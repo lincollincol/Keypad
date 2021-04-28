@@ -1,7 +1,7 @@
 package linc.com.keypad
 
 import android.content.Context
-import android.graphics.Color
+import android.graphics.Typeface
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
@@ -10,25 +10,29 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
 import androidx.annotation.IntegerRes
-import androidx.annotation.LayoutRes
-import androidx.core.view.setMargins
-import androidx.core.view.setPadding
+import androidx.core.content.ContextCompat
 
 class Keypad @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet,
-    defStyleAttr: Int = 0
+        context: Context,
+        attrs: AttributeSet,
+        defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
     private var clickListener: OnKeypadClickListener? = null
-    private var leftKey: CustomKey<*>? = null
-    private var rightKey: CustomKey<*>? = null
+    private var leftKey: CustomKey<*> = CustomKey("*")
+    private var rightKey: CustomKey<*> = CustomKey("#")
+
+    private var keypadStyle = KeypadStyle()
 
     init {
-        orientation = VERTICAL
+        ScreenManager.init()
+
         layoutParams = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
-        setBackgroundResource(R.color.design_default_color_primary)
+        orientation = VERTICAL
+//        setBackgroundResource(R.color.design_default_color_primary)
     }
 
     override fun onFinishInflate() {
@@ -40,25 +44,63 @@ class Keypad @JvmOverloads constructor(
         this.clickListener = clickListener
     }
 
-    fun setCustomTextKey(key: Key, value: String) {
+    fun hideCustomKey(key: Key, hide: Boolean) {
+        when(key) {
+            Key.LEFT -> leftKey.hide = hide
+            Key.RIGHT -> rightKey.hide = hide
+        }
+    }
+
+    fun setKeyCustomText(key: Key, value: String) {
         when(key) {
             Key.LEFT -> leftKey = CustomKey(value)
             Key.RIGHT -> rightKey = CustomKey(value)
         }
     }
 
-    fun setCustomImageKey(key: Key, @IntegerRes resource: Int) {
+    fun setKeyCustomImage(key: Key, @IntegerRes resource: Int) {
         when(key) {
             Key.LEFT -> leftKey = CustomKey(resource, CustomKey.IMAGE)
             Key.RIGHT -> rightKey = CustomKey(resource, CustomKey.IMAGE)
         }
     }
 
-    fun hideCustomKey(key: Key, hide: Boolean) {
-        when(key) {
-            Key.LEFT -> leftKey?.hide = hide
-            Key.RIGHT -> rightKey?.hide = hide
-        }
+    fun setKeyContentColorInt(@ColorInt colorInt: Int) {
+        keypadStyle.contentColor = colorInt
+    }
+
+    fun setKeyContentColorRes(@ColorRes colorRes: Int) {
+        keypadStyle.contentColor = ContextCompat.getColor(context, colorRes)
+    }
+
+    fun setKeyTextSize(sizeSp: Float) {
+        keypadStyle.textSize = sizeSp
+    }
+
+    fun setKeyTextStyle(typefaceStyle: Int) {
+        keypadStyle.textStyle = typefaceStyle
+    }
+
+    fun setKeyTextFont(font: Typeface) {
+        keypadStyle.textFont = font
+    }
+
+    fun enableKeyRipple(enable: Boolean) {
+        keypadStyle.keyRipple = enable
+    }
+
+    fun setKeypadColorInt(@ColorInt colorInt: Int) {
+        keypadStyle.keypadColor = colorInt
+    }
+
+    fun setKeypadColorRes(@ColorRes colorRes: Int) {
+        keypadStyle.keypadColor = ContextCompat.getColor(context, colorRes)
+    }
+
+    fun setKeypadHeightPercent(percentage: Int) {
+        keypadStyle.height = ScreenManager.getHeightByPercent(percentage)
+        removeAllViews()
+        initKeypad()
     }
 
     private fun initKeypad() {
@@ -68,93 +110,83 @@ class Keypad @JvmOverloads constructor(
         repeat(KEYS_PER_SECTION) { row ->
             section = getSection()
             repeat(KEYS_PER_SECTION) { col ->
-                // TODO: 28.04.21 getTextView according to config function
-                section.addView(TextView(context).apply {
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 45f)
-                    layoutParams = LayoutParams(0, WRAP_CONTENT).apply {
-//                        setMargins(25)
-//                        setPadding(50)
-                        weight = 33f
-                    }
-                    gravity = Gravity.CENTER
-                    text = key.toString()
-                    setBackgroundResource(R.color.design_default_color_error)
-                    setOnClickListener { clickListener?.onKeyClicked(text.toString().toInt()) }
+                section.addView(getTextKey(key.toString()).apply {
+                    setOnClickListener { clickListener?.onKeyClicked(contentInt()) }
                 })
                 key++
             }
             addView(section)
         }
 
-        // TODO: 28.04.21 getTextView according to config function
         // Fill last section
         section = getSection()
-        repeat(KEYS_PER_SECTION) { key ->
-            when {
-                key == LEFT_KEY -> {
-                    if(leftKey != null && leftKey?.hide!!.not()) {
-                        section.addView(when(leftKey?.type) {
-                            CustomKey.IMAGE -> {
-                                ImageView(context).apply {
-                                    setImageResource(leftKey?.value as Int)
-                                    setOnClickListener { clickListener?.onLeftKeyClicked() }
-                                }
-                            }
-                            else -> TextView(context).apply {
-                                setTextSize(TypedValue.COMPLEX_UNIT_SP, 45f)
-                                layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                                    setMargins(25)
-                                    setPadding(50)
-                                }
-                                text = leftKey?.value.toString()
-                                setBackgroundResource(R.color.design_default_color_error)
-                                setOnClickListener { clickListener?.onKeyClicked(key) }
-                            }
-                        })
-                    }
-                }
-                key == RIGHT_KEY -> {
-                    if(rightKey != null && rightKey?.hide!!.not()) {
-                        section.addView(when(rightKey?.type) {
-                            CustomKey.IMAGE -> {
-                                ImageView(context).apply {
-                                    setImageResource(rightKey?.value as Int)
-                                    setOnClickListener { clickListener?.onRightKeyClicked() }
-                                }
-                            }
-                            else -> TextView(context).apply {
-                                setTextSize(TypedValue.COMPLEX_UNIT_SP, 45f)
-                                layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                                    setMargins(25)
-                                    setPadding(50)
-                                }
-                                text = rightKey?.value.toString()
-                                setBackgroundResource(R.color.design_default_color_error)
-                                setOnClickListener { clickListener?.onKeyClicked(key) }
-                            }
-                        })
-                    }
-                }
-                key == ZERO_KEY -> TextView(context).apply {
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 45f)
-                    layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                        setMargins(25)
-                        setPadding(50)
-                    }
-                    text = "0"
-                    setBackgroundResource(R.color.design_default_color_error)
-                    setOnClickListener { clickListener?.onKeyClicked(key) }
-                }
+
+        fun addCustomKey(customKey: CustomKey<*>) {
+            if(customKey.hide.not()) {
+                section.addView(when (customKey.type) {
+                    CustomKey.IMAGE -> getImageKey()
+                    else -> getTextKey(customKey.value.toString())
+                })
             }
         }
+
+        addCustomKey(leftKey)
+        section.addView(getTextKey(ZERO_KEY).apply {
+            setOnClickListener { clickListener?.onKeyClicked(contentInt()) }
+        })
+        addCustomKey(rightKey)
+        addView(section)
     }
+
+    /**
+     * View providers
+     */
 
     private fun getSection() = LinearLayout(context).apply {
         this.orientation = orientation
         gravity = Gravity.CENTER
-        layoutParams = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
-        setBackgroundResource(R.color.design_default_color_secondary_variant)
+        layoutParams = LayoutParams(MATCH_PARENT, keypadStyle.getSectionHeight())
+        setBackgroundColor(keypadStyle.keypadColor)
+    }
 
+    private fun getTextKey(value: String) = TextView(context).apply {
+        text = value
+        gravity = Gravity.CENTER
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, keypadStyle.textSize)
+        // Font
+        setTypeface(keypadStyle.textFont)
+        // Style
+        setTypeface(typeface, keypadStyle.textStyle)
+        setTextColor(keypadStyle.contentColor)
+        layoutParams = LayoutParams(0, MATCH_PARENT).apply {
+            weight = KEY_HORIZONTAL_WEIGHT
+        }
+        if(keypadStyle.keyRipple) {
+            val typed = TypedValue()
+            context.theme.resolveAttribute(
+                    android.R.attr.selectableItemBackgroundBorderless,
+                    typed,
+                    true
+            )
+            setBackgroundResource(typed.resourceId)
+        }
+    }
+
+    private fun getImageKey() = ImageView(context).apply {
+        setImageResource(rightKey.value as Int)
+        layoutParams = LayoutParams(0, MATCH_PARENT).apply {
+            weight = KEY_HORIZONTAL_WEIGHT
+        }
+        gravity = Gravity.CENTER
+        if(keypadStyle.keyRipple) {
+            val typed = TypedValue()
+            context.theme.resolveAttribute(
+                    android.R.attr.selectableItemBackgroundBorderless,
+                    typed,
+                    true
+            )
+            setBackgroundResource(typed.resourceId)
+        }
     }
 
     abstract class OnKeypadClickListener {
@@ -170,10 +202,8 @@ class Keypad @JvmOverloads constructor(
     }
 
     companion object {
-        private const val LEFT_KEY = 0
-        private const val ZERO_KEY = 1
-        private const val RIGHT_KEY = 2
-        private const val LAST_KEYPAD_SECTION = 3
+        private const val ZERO_KEY = "0"
         private const val KEYS_PER_SECTION = 3
+        private const val KEY_HORIZONTAL_WEIGHT = 33f
     }
 }
