@@ -1,0 +1,3 @@
+include ':keypad'
+include ':app'
+rootProject.name = "KeypadExample"
