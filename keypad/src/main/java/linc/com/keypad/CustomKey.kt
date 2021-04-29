@@ -1,12 +1,11 @@
 package linc.com.keypad
 
-internal data class CustomKey<T>(
-    val value: T,
-    val type: Int = TEXT,
-    var hide: Boolean = false
+data class CustomKey(
+        var value: Any,
+        val key: Key,
+        var type: ContentType = ContentType.TEXT,
+        internal var hide: Boolean = false
 ) {
-    internal companion object {
-        const val TEXT = 0
-        const val IMAGE = 1
-    }
+    enum class Key { LEFT, RIGHT }
+    enum class ContentType { TEXT, IMAGE }
 }
