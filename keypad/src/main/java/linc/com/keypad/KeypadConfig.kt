@@ -77,6 +77,8 @@ class KeypadConfig private constructor(
         height = ScreenManager.getHeightByPercent(percentage)
     }
 
+    internal fun getKeypadHeight() = height
+
     internal fun getSectionHeight() = when (height) {
         WRAP_CONTENT -> height
         else -> height / 4

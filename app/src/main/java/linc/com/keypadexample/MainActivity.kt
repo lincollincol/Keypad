@@ -15,26 +15,26 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         findViewById<Keypad>(R.id.keypad).apply {
 
-            setKeyCustomText(CustomKey.Key.RIGHT, "#")
-            setKeyCustomImage(CustomKey.Key.LEFT, R.drawable.ic_coronavirus)
+//            setKeyCustomText(CustomKey.Key.RIGHT, "#")
+//            setKeyCustomImage(CustomKey.Key.LEFT, R.drawable.ic_coronavirus)
 //            hideCustomKey(CustomKey.Key.LEFT, true)
 
-            applyKeypadConfig(KeypadConfig.getInstance().apply {
-                setKeypadHeightPercent(70)
-                setKeyImageSize(100)
-                setKeyTextSize(24f)
-                setKeyTextStyle(Typeface.BOLD)
-                setKeypadColorRes(android.R.color.holo_purple)
-                setKeyContentColorRes(android.R.color.holo_green_light)
-            })
+//            applyKeypadConfig(KeypadConfig.getInstance().apply {
+//                setKeypadHeightPercent(70)
+//                setKeyImageSize(100)
+//                setKeyTextSize(24f)
+//                setKeyTextStyle(Typeface.BOLD)
+//                setKeypadColorRes(android.R.color.holo_purple)
+//                setKeyContentColorRes(android.R.color.holo_green_light)
+//            })
 
-            addKeypadClickListener(Keypad.OnKeyClickListener {
-                println("KEY = $it")
-            })
+//            addKeypadClickListener(Keypad.OnKeyClickListener {
+//                println("KEY = $it")
+//            })
 
-            addKeypadClickListener(Keypad.OnCustomKeyClickListener {
-                println("KEY = ${it.key} ${it.value}, ${it.type}")
-            })
+//            addKeypadClickListener(Keypad.OnCustomKeyClickListener {
+//                println("KEY = ${it.key} ${it.value}, ${it.type}")
+//            })
 
             /*addKeypadClickListener(object : Keypad.OnKeyClickListener {
                 override fun onKeyClick(value: Int) {
