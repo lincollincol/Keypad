@@ -74,7 +74,10 @@ class KeypadConfig private constructor(
     }
 
     fun setKeypadHeightPercent(percentage: Int) {
-        height = ScreenManager.getHeightByPercent(percentage)
+        height = ScreenManager.getHeightByPercent(when(percentage) {
+            in 0..100 -> percentage
+            else -> 100
+        })
     }
 
     internal fun getKeypadHeight() = height

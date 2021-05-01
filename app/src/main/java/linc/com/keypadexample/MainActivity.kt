@@ -19,14 +19,14 @@ class MainActivity : AppCompatActivity() {
 //            setKeyCustomImage(CustomKey.Key.LEFT, R.drawable.ic_coronavirus)
 //            hideCustomKey(CustomKey.Key.LEFT, true)
 
-//            applyKeypadConfig(KeypadConfig.getInstance().apply {
-//                setKeypadHeightPercent(70)
+            applyKeypadConfig(KeypadConfig.getInstance().apply {
+                setKeypadHeightPercent(50)
 //                setKeyImageSize(100)
 //                setKeyTextSize(24f)
 //                setKeyTextStyle(Typeface.BOLD)
 //                setKeypadColorRes(android.R.color.holo_purple)
 //                setKeyContentColorRes(android.R.color.holo_green_light)
-//            })
+            })
 
 //            addKeypadClickListener(Keypad.OnKeyClickListener {
 //                println("KEY = $it")

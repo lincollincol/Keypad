@@ -94,162 +94,51 @@ class Keypad @JvmOverloads constructor(
     }
 
     private fun initKeypad() {
-        /*layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
-
-        var key = 1
         keys.clear()
-
-        var tid = -1
-
-        repeat(KEYS_PER_SECTION) { row->
-            repeat(KEYS_PER_SECTION) { col ->
-                addView(getTextKey(key.toString()).apply {
-                    setOnClickListener { keyClick?.onKeyClick(contentInt()) }
-
-                    keys[arrayOf(row, col)] = this
-                })
-
-
-                println("id =========== ${keys[arrayOf(row, col)]?.id ?: 123}")
-                if(tid == -1) {
-                    ConstraintConnector.startToStartOf(keys[arrayOf(row, col)]!!.id, ConstraintSet.PARENT_ID)
-                    tid = keys[arrayOf(row, col)]!!.id
-                } else {
-                    ConstraintConnector.startToEndOf(keys[arrayOf(row, col)]!!.id, tid)
-                }
-
-                key++
-            }
-        }*/
-
-
-
-        /*repeat(KEYS_PER_SECTION) { col ->
-            val tid = ViewCompat.generateViewId()
-            val params = LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                addRule(ALIGN_PARENT_LEFT, TRUE)
-            }
-            addView(getTextKey("a").apply {
-                id = tid
-                setOnClickListener { keyClick?.onKeyClick(contentInt()) }
-            }, params)
-
-        }*/
-
-        // p.addRule(RelativeLayout.ALIGN_BOTTOM, tv.getId());
-
-        keys.clear()
-//        layoutParams = LayoutParams(MATCH_PARENT, keypadConfig.getKeypadHeight())
-        layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
-        initBase()
+        spawnKeys()
         ConstraintConnector.setParentLayout(this)
 
-
-
-        fun connectRow(row: Int) {
-            var prevView: View? = null
-            keys.filter { it.key[ROW] == row }.map { it.value }.forEach { view ->
-                when(prevView) {
-                    null -> ConstraintConnector.startToStartOf(view.id, ConstraintSet.PARENT_ID)
-                    else -> {
-                        ConstraintConnector.startToEndOf(view.id, prevView!!.id)
-                        ConstraintConnector.endToStartOf(prevView!!.id, view.id)
-                    }
-                }
-                prevView = view
-            }
-            ConstraintConnector.endToEndOf(prevView!!.id, ConstraintSet.PARENT_ID)
-        }
-
-        fun connectCol(col: Int) {
-            var prevView: View? = null
-            keys.filter { it.key[COL] == col }.map { it.value }.forEach { view ->
-                when(prevView) {
-                    null -> ConstraintConnector.topToTopOf(view.id, ConstraintSet.PARENT_ID)
-                    else -> {
-                        ConstraintConnector.topToBottomOf(view.id, prevView!!.id)
-                        ConstraintConnector.bottomToTopOf(prevView!!.id, view.id)
-                    }
-                }
-                prevView = view
-            }
-            ConstraintConnector.bottomToBottomOf(prevView!!.id, ConstraintSet.PARENT_ID)
-        }
-
         repeat(KEYS_PER_SECTION) {
-            connectRow(it)
-            connectCol(it)
+            linearConnect(it, ROW)
+            linearConnect(it, COL)
         }
 
-
-        /*keys.forEach {
-            val row = it.key[ROW]
-            val col = it.key[COL]
-            println("($row; $col) => ${it.value}")
-            // Row connections
-
-            it.value.layoutParams
-            when(row) {
-                FIRST -> ConstraintConnector.topToTopOf(it.value.id, ConstraintSet.PARENT_ID)
-                LAST -> ConstraintConnector.bottomToBottomOf(it.value.id, ConstraintSet.PARENT_ID)
-                INNER -> {
-                    println("INNER TO (${row-1}; $col) and (${row+1}; $col)")
-                    ConstraintConnector.topToBottomOf(it.value.id, keys[arrayOf(row-1, col)]!!.id)
-                    ConstraintConnector.bottomToTopOf(it.value.id, keys[arrayOf(row+1, col)]!!.id)
-                }
-            }
-            // Cols connections
-            when(col) {
-                FIRST -> ConstraintConnector.startToStartOf(it.value.id, ConstraintSet.PARENT_ID)
-                LAST -> ConstraintConnector.endToEndOf(it.value.id, ConstraintSet.PARENT_ID)
-                INNER -> {
-                    println("INNER TO ($row; ${col-1}) and ($row; ${col+1})")
-                    ConstraintConnector.startToEndOf(it.value.id, keys[arrayOf(row, col-1)]!!.id)
-                    ConstraintConnector.endToStartOf(it.value.id, keys[arrayOf(row, col+1)]!!.id)
-                }
-            }
-        }*/
-
-        /*repeat(KEYS_PER_SECTION) { row ->
-            section = getSection()
-            repeat(KEYS_PER_SECTION) { col ->
-                section.addView(getTextKey(key.toString()).apply {
-                    setOnClickListener { keyClick?.onKeyClick(contentInt()) }
-                })
-                key++
-            }
-            addView(section)
-        }
-
-        // Fill last section
-        section = getSection()
-
-        fun addCustomKey(key: CustomKey.Key) {
-            val customKey = customKeys.find { it.key == key }!!
-            if(customKey.hide.not()) {
-                section.addView(when (customKey.type) {
-                    CustomKey.ContentType.IMAGE -> getImageKey(customKey.value as Int)
-                    else -> getTextKey(customKey.value.toString())
-                }.apply {
-                    setOnClickListener { customClick?.onCustomKeyClick(customKey) }
-                })
-            } else {
-                section.addView(getTextKey(EMPTY_KEY))
-            }
-        }
-
-        addCustomKey(CustomKey.Key.LEFT)
-        section.addView(getTextKey(ZERO_KEY).apply {
-            setOnClickListener { keyClick?.onKeyClick(contentInt()) }
-        })
-        addCustomKey(CustomKey.Key.RIGHT)
-        addView(section)*/
     }
 
-    private fun initBase() {
+    private fun linearConnect(currentDest: Int, dest: Int) {
+        var prevView: View? = null
+        keys.filter { it.key[dest] == currentDest }.map { it.value }.forEach { view ->
+            when(prevView) {
+                null -> when(dest) {
+                    ROW -> ConstraintConnector.startToStartOf(view.id, ConstraintSet.PARENT_ID)
+                    COL -> ConstraintConnector.topToTopOf(view.id, ConstraintSet.PARENT_ID)
+                }
+                else -> {
+                    when(dest) {
+                        ROW -> {
+                            ConstraintConnector.startToEndOf(view.id, prevView!!.id)
+                            ConstraintConnector.endToStartOf(prevView!!.id, view.id)
+                        }
+                        COL -> {
+                            ConstraintConnector.topToBottomOf(view.id, prevView!!.id)
+                            ConstraintConnector.bottomToTopOf(prevView!!.id, view.id)
+                        }
+                    }
+                }
+            }
+            prevView = view
+        }
+        when(dest) {
+            ROW -> ConstraintConnector.endToEndOf(prevView!!.id, ConstraintSet.PARENT_ID)
+            COL -> ConstraintConnector.bottomToBottomOf(prevView!!.id, ConstraintSet.PARENT_ID)
+        }
+    }
+
+    private fun spawnKeys() {
         var key = 1
         keys.clear()
 
+        // Main 1..9 keys
         repeat(KEYS_PER_SECTION) { row->
             repeat(KEYS_PER_SECTION) { col ->
                 addView(getTextKey(key.toString()).apply {
@@ -259,6 +148,8 @@ class Keypad @JvmOverloads constructor(
                 key++
             }
         }
+        // Additional keys: 0 + left and right
+
     }
 
     /**
@@ -273,7 +164,7 @@ class Keypad @JvmOverloads constructor(
     }
 
     private fun getTextKey(value: String) = TextView(context).apply {
-        setId(View.generateViewId())
+        id = View.generateViewId()
         text = value
         gravity = Gravity.CENTER
         setTextSize(TypedValue.COMPLEX_UNIT_SP, keypadConfig.textSize)
@@ -282,10 +173,7 @@ class Keypad @JvmOverloads constructor(
         // Style
         setTypeface(typeface, keypadConfig.textStyle)
         setTextColor(getWrapperColor(keypadConfig.contentColor))
-        layoutParams = LayoutParams(WRAP_CONTENT, keypadConfig.getSectionHeight()).apply {
-//        layoutParams = LayoutParams(0, WRAP_CONTENT).apply {
-//            weight = KEY_HORIZONTAL_WEIGHT
-        }
+        layoutParams = LayoutParams(WRAP_CONTENT, keypadConfig.getSectionHeight())
         if(keypadConfig.keyRipple) {
             val typed = TypedValue()
             context.theme.resolveAttribute(
