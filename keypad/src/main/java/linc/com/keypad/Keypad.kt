@@ -1,17 +1,12 @@
 package linc.com.keypad
 
-import android.R
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -19,7 +14,6 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import androidx.core.widget.ImageViewCompat
 
 
@@ -33,10 +27,7 @@ class Keypad @JvmOverloads constructor(
     private var customClick: OnCustomKeyClickListener? = null
 
     private var keypadConfig = KeypadConfig.getInstance()
-    private var customKeys = mutableListOf(
-            CustomKey("*", CustomKey.Key.LEFT),
-            CustomKey("#", CustomKey.Key.RIGHT)
-    )
+
 
     private val keys = linkedMapOf<Array<Int>, View>()
 
@@ -55,24 +46,6 @@ class Keypad @JvmOverloads constructor(
 
     fun addKeypadClickListener(clickListener: OnKeyClickListener) {
         keyClick = clickListener
-    }
-
-    fun hideCustomKey(key: CustomKey.Key, hide: Boolean) {
-        customKeys.find { it.key == key }?.hide = hide
-    }
-
-    fun setKeyCustomText(key: CustomKey.Key, value: String) {
-        customKeys.find { it.key == key }?.let {
-            it.value = value
-            it.type = CustomKey.ContentType.TEXT
-        }
-    }
-
-    fun setKeyCustomImage(key: CustomKey.Key, @DrawableRes resource: Int) {
-        customKeys.find { it.key == key }?.let {
-            it.value = resource
-            it.type = CustomKey.ContentType.IMAGE
-        }
     }
 
     fun applyKeypadConfig(config: KeypadConfig) {
@@ -137,7 +110,7 @@ class Keypad @JvmOverloads constructor(
         }
         // Additional keys: 0 + left and right
         fun addCustomKey(key: CustomKey.Key) {
-            val customKey = customKeys.find { it.key == key }!!
+            val customKey = keypadConfig.getCustomKey(key)!!
             if(customKey.hide.not()) {
                 addView(when (customKey.type) {
                     CustomKey.ContentType.IMAGE -> getImageKey(customKey.value as Int)
@@ -172,7 +145,7 @@ class Keypad @JvmOverloads constructor(
         this.orientation = orientation
         gravity = Gravity.CENTER
         layoutParams = LayoutParams(MATCH_PARENT, keypadConfig.getSectionHeight())
-        setBackgroundColor(getWrapperColor(keypadConfig.keypadColor))
+//        setBackgroundColor(getWrapperColor(keypadConfig.keypadColor))
     }
 
     private fun getTextKey(value: String) = TextView(context).apply {
@@ -186,7 +159,7 @@ class Keypad @JvmOverloads constructor(
         setTypeface(typeface, keypadConfig.textStyle)
         setTextColor(getWrapperColor(keypadConfig.contentColor))
         layoutParams = LayoutParams(0, keypadConfig.getSectionHeight())
-        if(keypadConfig.keyRipple) {
+        if(keypadConfig.enableKeyRipple) {
             val typed = TypedValue()
             context.theme.resolveAttribute(
                     android.R.attr.selectableItemBackgroundBorderless,
@@ -206,7 +179,7 @@ class Keypad @JvmOverloads constructor(
                 getWrapperColor(keypadConfig.contentColor)
         ))
         layoutParams = LayoutParams(0, keypadConfig.getSectionHeight())
-        if(keypadConfig.keyRipple) {
+        if(keypadConfig.enableKeyRipple) {
             val typed = TypedValue()
             context.theme.resolveAttribute(
                     R.attr.selectableItemBackgroundBorderless,
@@ -218,8 +191,8 @@ class Keypad @JvmOverloads constructor(
         }
     }
 
-    private fun getWrapperColor(wrapper: KeypadConfig.ConfigColorWrapper) = when(wrapper.colorSource) {
-        KeypadConfig.ConfigColorWrapper.ColorSource.INT -> wrapper.color
+    private fun getWrapperColor(wrapper: ConfigColorWrapper) = when(wrapper.colorSource) {
+        ConfigColorWrapper.ColorSource.INT -> wrapper.color
         else -> ContextCompat.getColor(context, wrapper.color)
     }
 

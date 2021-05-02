@@ -6,20 +6,21 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <!--<ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="center"
         android:src="@drawable/ic_coronavirus"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/keypad"/>
+        app:layout_constraintBottom_toTopOf="@id/keypad"/>-->
 
     <linc.com.keypad.Keypad
         android:id="@+id/keypad"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#30ff00ff"
+        android:background="#FF00FF"
         android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

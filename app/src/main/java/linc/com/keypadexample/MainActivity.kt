@@ -16,16 +16,18 @@ class MainActivity : AppCompatActivity() {
         findViewById<Keypad>(R.id.keypad).apply {
 
 //            setKeyCustomText(CustomKey.Key.RIGHT, "#")
-            setKeyCustomImage(CustomKey.Key.LEFT, R.drawable.ic_coronavirus)
+//            setKeyCustomImage(CustomKey.Key.LEFT, R.drawable.ic_coronavirus)
 //            hideCustomKey(CustomKey.Key.LEFT, true)
+
+
 
             applyKeypadConfig(KeypadConfig.getInstance().apply {
                 setKeypadHeightPercent(50)
 //                setKeyImageSize(100)
 //                setKeyTextSize(24f)
-//                setKeyTextStyle(Typeface.BOLD)
+                setKeyTextStyle(Typeface.BOLD)
 //                setKeypadColorRes(android.R.color.holo_purple)
-//                setKeyContentColorRes(android.R.color.holo_green_light)
+                setKeyContentColorRes(android.R.color.white)
             })
 
 //            addKeypadClickListener(Keypad.OnKeyClickListener {
