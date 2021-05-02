@@ -1,35 +1,26 @@
 package linc.com.keypad
 
+import android.R
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.Color
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.RippleDrawable
-import android.text.Layout
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.annotation.DrawableRes
-import androidx.constraintlayout.widget.ConstraintHelper
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.updateLayoutParams
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.widget.ImageViewCompat
-import com.google.android.material.ripple.RippleDrawableCompat
-import com.google.android.material.ripple.RippleUtils
-import com.google.android.material.shape.ShapeAppearanceModel
-import java.util.*
 
 
 class Keypad @JvmOverloads constructor(
@@ -51,13 +42,10 @@ class Keypad @JvmOverloads constructor(
 
     init {
         ScreenManager.init()
-//        ConstraintConnector.setParentLayout(this)
-//        orientation = VERTICAL
     }
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        println("FINISH INFLATE")
         initKeypad()
     }
 
@@ -95,21 +83,20 @@ class Keypad @JvmOverloads constructor(
 
     private fun initKeypad() {
         keys.clear()
-        spawnKeys()
-        ConstraintConnector.setParentLayout(this)
+        spawnViews()
 
         repeat(KEYS_PER_SECTION) {
             linearConnect(it, ROW)
             linearConnect(it, COL)
         }
-
+        linearConnect(ADDITIONAL_ROW, ROW)
     }
 
     private fun linearConnect(currentDest: Int, dest: Int) {
         var prevView: View? = null
         keys.filter { it.key[dest] == currentDest }.map { it.value }.forEach { view ->
             when(prevView) {
-                null -> when(dest) {
+                null -> when (dest) {
                     ROW -> ConstraintConnector.startToStartOf(view.id, ConstraintSet.PARENT_ID)
                     COL -> ConstraintConnector.topToTopOf(view.id, ConstraintSet.PARENT_ID)
                 }
@@ -134,7 +121,7 @@ class Keypad @JvmOverloads constructor(
         }
     }
 
-    private fun spawnKeys() {
+    private fun spawnViews() {
         var key = 1
         keys.clear()
 
@@ -149,7 +136,32 @@ class Keypad @JvmOverloads constructor(
             }
         }
         // Additional keys: 0 + left and right
+        fun addCustomKey(key: CustomKey.Key) {
+            val customKey = customKeys.find { it.key == key }!!
+            if(customKey.hide.not()) {
+                addView(when (customKey.type) {
+                    CustomKey.ContentType.IMAGE -> getImageKey(customKey.value as Int)
+                    else -> getTextKey(customKey.value.toString())
+                }.apply {
+                    setOnClickListener { customClick?.onCustomKeyClick(customKey) }
+                    keys[arrayOf(ADDITIONAL_ROW, key.position)] = this
+                })
+            } else {
+                addView(getTextKey(EMPTY_KEY).apply {
+                    keys[arrayOf(ADDITIONAL_ROW, key.position)] = this
+                })
+            }
+        }
 
+        addCustomKey(CustomKey.Key.LEFT)
+        addView(getTextKey(ZERO_KEY).apply {
+            setOnClickListener { keyClick?.onKeyClick(contentInt()) }
+            keys[arrayOf(ADDITIONAL_ROW, ZERO)] = this
+        })
+        addCustomKey(CustomKey.Key.RIGHT)
+
+        // Refresh connector
+        ConstraintConnector.setParentLayout(this)
     }
 
     /**
@@ -173,12 +185,11 @@ class Keypad @JvmOverloads constructor(
         // Style
         setTypeface(typeface, keypadConfig.textStyle)
         setTextColor(getWrapperColor(keypadConfig.contentColor))
-        layoutParams = LayoutParams(WRAP_CONTENT, keypadConfig.getSectionHeight())
+        layoutParams = LayoutParams(0, keypadConfig.getSectionHeight())
         if(keypadConfig.keyRipple) {
             val typed = TypedValue()
             context.theme.resolveAttribute(
                     android.R.attr.selectableItemBackgroundBorderless,
-//                    android.R.attr.actionBarItemBackground,
                     typed,
                     true
             )
@@ -188,44 +199,23 @@ class Keypad @JvmOverloads constructor(
     }
 
     private fun getImageKey(@DrawableRes resource: Int) = ImageView(context).apply {
+        id = View.generateViewId()
         setImageResource(resource)
-        val back = ContextCompat.getDrawable(context, resource).apply {
-//            scaleX = 2.5f
-//            scaleY = 2.5f
-        }
-//        background = getBackgroundDrawable(Color.RED, background)
 
         ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(
                 getWrapperColor(keypadConfig.contentColor)
         ))
-        layoutParams = LayoutParams(0, WRAP_CONTENT).apply {
-//        layoutParams = LayoutParams(keypadConfig.imageSize, keypadConfig.imageSize).apply {
-//            weight = KEY_HORIZONTAL_WEIGHT
-        }
-//        gravity = Gravity.CENTER
+        layoutParams = LayoutParams(0, keypadConfig.getSectionHeight())
         if(keypadConfig.keyRipple) {
             val typed = TypedValue()
             context.theme.resolveAttribute(
-//                    android.R.attr.selectableItemBackgroundBorderless,
-                    R.drawable.ripple,
+                    R.attr.selectableItemBackgroundBorderless,
+//                    R.attr.selectableItemBackground,
                     typed,
                     true
             )
             setBackgroundResource(typed.resourceId)
         }
-    }
-
-    fun getBackgroundDrawable(pressedColor: Int, backgroundDrawable: Drawable?): RippleDrawable {
-        return RippleDrawable(getPressedState(pressedColor)!!, backgroundDrawable, null).apply {
-//            setBounds(0, 0, 2, 2)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                radius = 5
-            }
-        }
-    }
-
-    fun getPressedState(pressedColor: Int): ColorStateList? {
-        return ColorStateList(arrayOf(intArrayOf()), intArrayOf(pressedColor))
     }
 
     private fun getWrapperColor(wrapper: KeypadConfig.ConfigColorWrapper) = when(wrapper.colorSource) {
@@ -245,17 +235,12 @@ class Keypad @JvmOverloads constructor(
         private const val ZERO_KEY = "0"
         private const val EMPTY_KEY = ""
         private const val KEYS_PER_SECTION = 3
-        private const val KEY_HORIZONTAL_WEIGHT = 33f
 
-        // keypad limits
-        private const val FIRST = 0
-        private const val LAST = 2
-        private const val INNER = 1
-
-        // positions
         private const val ROW = 0
         private const val COL = 1
 
+        private const val ADDITIONAL_ROW = 3
+        private const val ZERO = 1
 
     }
 }

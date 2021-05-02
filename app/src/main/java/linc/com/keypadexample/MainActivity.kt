@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<Keypad>(R.id.keypad).apply {
 
 //            setKeyCustomText(CustomKey.Key.RIGHT, "#")
-//            setKeyCustomImage(CustomKey.Key.LEFT, R.drawable.ic_coronavirus)
+            setKeyCustomImage(CustomKey.Key.LEFT, R.drawable.ic_coronavirus)
 //            hideCustomKey(CustomKey.Key.LEFT, true)
 
             applyKeypadConfig(KeypadConfig.getInstance().apply {

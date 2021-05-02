@@ -6,6 +6,6 @@ data class CustomKey(
         var type: ContentType = ContentType.TEXT,
         internal var hide: Boolean = false
 ) {
-    enum class Key { LEFT, RIGHT }
+    enum class Key(internal val position: Int) { LEFT(0), RIGHT(2) }
     enum class ContentType { TEXT, IMAGE }
 }
