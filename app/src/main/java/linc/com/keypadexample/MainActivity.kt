@@ -15,12 +15,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         findViewById<Keypad>(R.id.keypad).apply {
 
-//            setKeyCustomText(CustomKey.Key.RIGHT, "#")
-//            setKeyCustomImage(CustomKey.Key.LEFT, R.drawable.ic_coronavirus)
-//            hideCustomKey(CustomKey.Key.LEFT, true)
-
-
-
             applyKeypadConfig(KeypadConfig.getInstance().apply {
                 setKeypadHeightPercent(50)
 //                setKeyImageSize(100)
@@ -28,21 +22,26 @@ class MainActivity : AppCompatActivity() {
                 setKeyTextStyle(Typeface.BOLD)
 //                setKeypadColorRes(android.R.color.holo_purple)
                 setKeyContentColorRes(android.R.color.white)
+                setCustomKey(CustomKey.getInstance("+", CustomKey.Key.LEFT).apply {
+//                    setKeyContentColorInt(Color.GREEN)
+                    setKeyTextStyle(Typeface.ITALIC)
+
+                })
+                setCustomKey(CustomKey.getInstance(R.drawable.ic_coronavirus, CustomKey.Key.RIGHT).apply {
+
+                    setKeyContentColorInt(Color.CYAN)
+                })
+//                hideCustomKey(CustomKey.Key.LEFT, false)
             })
 
-//            addKeypadClickListener(Keypad.OnKeyClickListener {
-//                println("KEY = $it")
-//            })
+            addKeypadClickListener(Keypad.OnKeyClickListener {
+                println("KEY = $it")
+            })
 
-//            addKeypadClickListener(Keypad.OnCustomKeyClickListener {
-//                println("KEY = ${it.key} ${it.value}, ${it.type}")
-//            })
+            addKeypadClickListener(Keypad.OnCustomKeyClickListener {
 
-            /*addKeypadClickListener(object : Keypad.OnKeyClickListener {
-                override fun onKeyClick(value: Int) {
-                }
-            })*/
-
+                println("KEY = ${it.key} ${it.value}, ${it.type}")
+            })
 
             /*setOnKeypadClickListener(object : Keypad.OnKeypadClickListener() {
                 override fun onKeyClicked(value: Int) {

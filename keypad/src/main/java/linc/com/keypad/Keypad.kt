@@ -28,7 +28,6 @@ class Keypad @JvmOverloads constructor(
 
     private var keypadConfig = KeypadConfig.getInstance()
 
-
     private val keys = linkedMapOf<Array<Int>, View>()
 
     init {
@@ -57,12 +56,12 @@ class Keypad @JvmOverloads constructor(
     private fun initKeypad() {
         keys.clear()
         spawnViews()
-
         repeat(KEYS_PER_SECTION) {
             linearConnect(it, ROW)
             linearConnect(it, COL)
         }
         linearConnect(ADDITIONAL_ROW, ROW)
+        keys.clear()
     }
 
     private fun linearConnect(currentDest: Int, dest: Int) {
@@ -113,8 +112,8 @@ class Keypad @JvmOverloads constructor(
             val customKey = keypadConfig.getCustomKey(key)!!
             if(customKey.hide.not()) {
                 addView(when (customKey.type) {
-                    CustomKey.ContentType.IMAGE -> getImageKey(customKey.value as Int)
-                    else -> getTextKey(customKey.value.toString())
+                    CustomKey.ContentType.IMAGE -> getImageKey(customKey.value as Int, key)
+                    else -> getTextKey(customKey.value.toString(), key)
                 }.apply {
                     setOnClickListener { customClick?.onCustomKeyClick(customKey) }
                     keys[arrayOf(ADDITIONAL_ROW, key.position)] = this
@@ -141,54 +140,65 @@ class Keypad @JvmOverloads constructor(
      * View providers
      */
 
-    private fun getSection() = LinearLayout(context).apply {
-        this.orientation = orientation
-        gravity = Gravity.CENTER
-        layoutParams = LayoutParams(MATCH_PARENT, keypadConfig.getSectionHeight())
-//        setBackgroundColor(getWrapperColor(keypadConfig.keypadColor))
-    }
-
-    private fun getTextKey(value: String) = TextView(context).apply {
+    private fun getTextKey(value: String, key: CustomKey.Key? = null) = TextView(context).apply {
         id = View.generateViewId()
         text = value
         gravity = Gravity.CENTER
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, keypadConfig.textSize)
-        // Font
-        setTypeface(keypadConfig.textFont)
-        // Style
-        setTypeface(typeface, keypadConfig.textStyle)
-        setTextColor(getWrapperColor(keypadConfig.contentColor))
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, when(key) {
+            null -> keypadConfig.textSize
+            else -> keypadConfig.getCustomKey(key)!!.textSize.getValue()
+        })
+//        setTypeface(keypadConfig.textFont)
+        setTypeface(when(key) {
+            null -> keypadConfig.textFont
+            else -> keypadConfig.getCustomKey(key)!!.textFont.getValue()
+        })
+//        setTypeface(typeface, keypadConfig.textStyle)
+        setTypeface(typeface, when(key) {
+            null -> keypadConfig.textStyle
+            else -> keypadConfig.getCustomKey(key)!!.textStyle.getValue()
+        })
+//        setTextColor(getWrapperColor(keypadConfig.contentColor))
+        setTextColor(getWrapperColor(when(key) {
+            null -> keypadConfig.contentColor
+            else -> keypadConfig.getCustomKey(key)!!.contentColor.getValue()
+        }))
         layoutParams = LayoutParams(0, keypadConfig.getSectionHeight())
-        if(keypadConfig.enableKeyRipple) {
-            val typed = TypedValue()
-            context.theme.resolveAttribute(
-                    android.R.attr.selectableItemBackgroundBorderless,
-                    typed,
-                    true
-            )
-            setBackgroundResource(typed.resourceId)
+
+        val enableRipple = when(key) {
+            null -> keypadConfig.enableKeyRipple
+            else -> keypadConfig.getCustomKey(key)!!.enableKeyRipple.getValue()
         }
+
+        if(enableRipple)
+            enableBorderlessRipple()
 
     }
 
-    private fun getImageKey(@DrawableRes resource: Int) = ImageView(context).apply {
+    private fun getImageKey(@DrawableRes resource: Int, key: CustomKey.Key? = null) = ImageView(context).apply {
         id = View.generateViewId()
         setImageResource(resource)
 
+        when(key) {
+            null -> println("PARENT COLOR FOR $key")
+            else -> println("CHILD COLOR FOR $key")
+        }
+
         ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(
-                getWrapperColor(keypadConfig.contentColor)
+                getWrapperColor(when(key) {
+                    null -> keypadConfig.contentColor
+                    else -> keypadConfig.getCustomKey(key)!!.contentColor.getValue()
+                })
         ))
         layoutParams = LayoutParams(0, keypadConfig.getSectionHeight())
-        if(keypadConfig.enableKeyRipple) {
-            val typed = TypedValue()
-            context.theme.resolveAttribute(
-                    R.attr.selectableItemBackgroundBorderless,
-//                    R.attr.selectableItemBackground,
-                    typed,
-                    true
-            )
-            setBackgroundResource(typed.resourceId)
+
+        val enableRipple = when(key) {
+            null -> keypadConfig.enableKeyRipple
+            else -> keypadConfig.getCustomKey(key)!!.enableKeyRipple.getValue()
         }
+
+        if(enableRipple)
+            enableBorderlessRipple()
     }
 
     private fun getWrapperColor(wrapper: ConfigColorWrapper) = when(wrapper.colorSource) {
@@ -214,6 +224,5 @@ class Keypad @JvmOverloads constructor(
 
         private const val ADDITIONAL_ROW = 3
         private const val ZERO = 1
-
     }
 }

@@ -11,10 +11,10 @@ import androidx.annotation.DrawableRes
 
 class KeypadConfig private constructor(
         internal var contentColor: ConfigColorWrapper = ConfigColorWrapper(Color.BLACK),
+        // TODO: 03.05.21 padding
         internal var textSize: Float = 45f,
         internal var textStyle: Int = Typeface.NORMAL,
         internal var textFont: Typeface = Typeface.DEFAULT,
-        internal var imageScaleType: ImageView.ScaleType = ImageView.ScaleType.CENTER,
         internal var enableKeyRipple: Boolean = true,
         private var height: Int = WRAP_CONTENT,
         // TODO: 29.04.21 handle width
@@ -32,52 +32,44 @@ class KeypadConfig private constructor(
         getCustomKey(key)?.hide = hide
     }
 
-    fun setKeyCustomText(key: CustomKey.Key, value: String) {
-        getCustomKey(key)?.let {
-            it.value = value
-            it.type = CustomKey.ContentType.TEXT
-        }
-    }
-
-    fun setKeyCustomImage(key: CustomKey.Key, @DrawableRes resource: Int) {
-        customKeys.find { it.key == key }?.let {
-            it.value = resource
-            it.type = CustomKey.ContentType.IMAGE
-        }
+    fun setCustomKey(customKey: CustomKey) {
+//        customKeys.apply {
+//            removeAll { it.key == customKey.key }
+//            add(customKey)
+//        }
+        getCustomKey(customKey.key)?.updateKey(customKey)
     }
 
     fun setKeyContentColorInt(@ColorInt colorInt: Int) {
-        contentColor.apply {
-            color = colorInt
-            colorSource = ConfigColorWrapper.ColorSource.INT
-        }
+        val color = ConfigColorWrapper(colorInt, ConfigColorWrapper.ColorSource.INT)
+        contentColor = color
+        customKeys.forEach { it.contentColor.setGlobal(color) }
     }
 
     fun setKeyContentColorRes(@ColorRes colorRes: Int) {
-        contentColor.apply {
-            color = colorRes
-            colorSource = ConfigColorWrapper.ColorSource.RES
-        }
+        val color = ConfigColorWrapper(colorRes, ConfigColorWrapper.ColorSource.RES)
+        contentColor = color
+        customKeys.forEach { it.contentColor.setGlobal(color) }
     }
 
     fun setKeyTextSize(sizeSp: Float) {
         textSize = sizeSp
+        customKeys.forEach { it.textSize.setGlobal(sizeSp) }
     }
 
     fun setKeyTextStyle(typefaceStyle: Int) {
         textStyle = typefaceStyle
+        customKeys.forEach { it.textStyle.setGlobal(typefaceStyle) }
     }
 
     fun setKeyTextFont(font: Typeface) {
         textFont = font
-    }
-
-    fun setKeyImageScaleType(scale :ImageView.ScaleType) {
-        imageScaleType = scale
+        customKeys.forEach { it.textFont.setGlobal(font) }
     }
 
     fun enableKeyRipple(enable: Boolean) {
         enableKeyRipple = enable
+        customKeys.forEach { it.enableKeyRipple.setGlobal(enable) }
     }
 
     fun setKeypadHeightPercent(percentage: Int) {
@@ -86,8 +78,6 @@ class KeypadConfig private constructor(
             else -> 100
         })
     }
-
-    internal fun getKeypadHeight() = height
 
     internal fun getSectionHeight() = when (height) {
         WRAP_CONTENT -> height
