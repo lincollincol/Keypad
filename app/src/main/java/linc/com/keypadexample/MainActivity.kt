@@ -5,7 +5,7 @@ import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import linc.com.keypad.CustomKey
-import linc.com.keypad.Keypad
+import linc.com.keypad.KeypadView
 import linc.com.keypad.KeypadConfig
 
 class MainActivity : AppCompatActivity() {
@@ -13,11 +13,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        findViewById<Keypad>(R.id.keypad).apply {
+        findViewById<KeypadView>(R.id.keypad).apply {
 
             applyKeypadConfig(KeypadConfig.getInstance().apply {
                 setKeypadHeightPercent(50)
-//                setKeyImageSize(100)
+//                setKeypadWidthPercent(50)
 //                setKeyTextSize(24f)
                 setKeyTextStyle(Typeface.BOLD)
 //                setKeypadColorRes(android.R.color.holo_purple)
@@ -28,17 +28,17 @@ class MainActivity : AppCompatActivity() {
 
                 })
                 setCustomKey(CustomKey.getInstance(R.drawable.ic_coronavirus, CustomKey.Key.RIGHT).apply {
-
+                    setContentPadding(50)
                     setKeyContentColorInt(Color.CYAN)
                 })
 //                hideCustomKey(CustomKey.Key.LEFT, false)
             })
 
-            addKeypadClickListener(Keypad.OnKeyClickListener {
+            addKeypadClickListener(KeypadView.OnKeyClickListener {
                 println("KEY = $it")
             })
 
-            addKeypadClickListener(Keypad.OnCustomKeyClickListener {
+            addKeypadClickListener(KeypadView.OnCustomKeyClickListener {
 
                 println("KEY = ${it.key} ${it.value}, ${it.type}")
             })

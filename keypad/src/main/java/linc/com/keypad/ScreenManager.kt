@@ -16,9 +16,15 @@ internal object ScreenManager {
         println(height)
     }
 
-    fun getWidthByPercent(percent: Int) = (width * percent) / 100
+    fun getWidthByPercent(percent: Int) = when(percent) {
+        in 0..100 -> (width * percent) / 100
+        else -> width
+    }
 
-    fun getHeightByPercent(percent: Int) = (height * percent) / 100
+    fun getHeightByPercent(percent: Int) = when(percent) {
+        in 0..100 -> (height * percent) / 100
+        else -> height
+    }
 
     fun getWidth() = width
 

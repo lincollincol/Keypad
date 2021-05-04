@@ -2,11 +2,13 @@ package linc.com.keypad
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Canvas
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -15,19 +17,22 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
+import kotlin.reflect.cast
+import kotlin.reflect.safeCast
 
 
-class Keypad @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet,
-        defStyleAttr: Int = 0,
+class KeypadView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet,
+    defStyleAttr: Int = 0,
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
+
+    // TODO: 04.05.21 xml attrs support
+    // TODO: 04.05.21 wrap custom key click data
 
     private var keyClick: OnKeyClickListener? = null
     private var customClick: OnCustomKeyClickListener? = null
-
     private var keypadConfig = KeypadConfig.getInstance()
-
     private val keys = linkedMapOf<Array<Int>, View>()
 
     init {
@@ -53,8 +58,19 @@ class Keypad @JvmOverloads constructor(
         initKeypad()
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        layoutParams.apply {
+            if(keypadConfig.width.state == SizeWrapper.State.CHANGED)
+                width = keypadConfig.width.value
+            if(keypadConfig.height.state == SizeWrapper.State.CHANGED)
+                height = keypadConfig.height.value
+        }
+    }
+
     private fun initKeypad() {
         keys.clear()
+
         spawnViews()
         repeat(KEYS_PER_SECTION) {
             linearConnect(it, ROW)
@@ -132,7 +148,7 @@ class Keypad @JvmOverloads constructor(
         })
         addCustomKey(CustomKey.Key.RIGHT)
 
-        // Refresh connector
+        // Update connector
         ConstraintConnector.setParentLayout(this)
     }
 
@@ -144,26 +160,42 @@ class Keypad @JvmOverloads constructor(
         id = View.generateViewId()
         text = value
         gravity = Gravity.CENTER
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, when(key) {
-            null -> keypadConfig.textSize
-            else -> keypadConfig.getCustomKey(key)!!.textSize.getValue()
-        })
-//        setTypeface(keypadConfig.textFont)
-        setTypeface(when(key) {
-            null -> keypadConfig.textFont
-            else -> keypadConfig.getCustomKey(key)!!.textFont.getValue()
-        })
-//        setTypeface(typeface, keypadConfig.textStyle)
-        setTypeface(typeface, when(key) {
-            null -> keypadConfig.textStyle
-            else -> keypadConfig.getCustomKey(key)!!.textStyle.getValue()
-        })
-//        setTextColor(getWrapperColor(keypadConfig.contentColor))
-        setTextColor(getWrapperColor(when(key) {
-            null -> keypadConfig.contentColor
-            else -> keypadConfig.getCustomKey(key)!!.contentColor.getValue()
-        }))
-        layoutParams = LayoutParams(0, keypadConfig.getSectionHeight())
+        setTextSize(
+            TypedValue.COMPLEX_UNIT_SP, when (key) {
+                null -> keypadConfig.textSize
+                else -> keypadConfig.getCustomKey(key)!!.textSize.getValue()
+            }
+        )
+        setTypeface(
+            when (key) {
+                null -> keypadConfig.textFont
+                else -> keypadConfig.getCustomKey(key)!!.textFont.getValue()
+            }
+        )
+        setTypeface(
+            typeface, when (key) {
+                null -> keypadConfig.textStyle
+                else -> keypadConfig.getCustomKey(key)!!.textStyle.getValue()
+            }
+        )
+        setTextColor(
+            getWrapperColor(
+                when (key) {
+                    null -> keypadConfig.contentColor
+                    else -> keypadConfig.getCustomKey(key)!!.contentColor.getValue()
+                }
+            )
+        )
+
+//        layoutParams = LayoutParams(0, keypadConfig.getSectionHeight())
+        layoutParams = LayoutParams(0, 0)
+
+        val padding = when(key) {
+            null -> keypadConfig.contentPadding
+            else -> keypadConfig.getCustomKey(key)!!.contentPadding.getValue()
+        }
+
+        setPadding(padding, padding, padding, padding)
 
         val enableRipple = when(key) {
             null -> keypadConfig.enableKeyRipple
@@ -175,22 +207,32 @@ class Keypad @JvmOverloads constructor(
 
     }
 
-    private fun getImageKey(@DrawableRes resource: Int, key: CustomKey.Key? = null) = ImageView(context).apply {
+    private fun getImageKey(@DrawableRes resource: Int, key: CustomKey.Key? = null) = ImageView(
+        context
+    ).apply {
         id = View.generateViewId()
         setImageResource(resource)
 
-        when(key) {
-            null -> println("PARENT COLOR FOR $key")
-            else -> println("CHILD COLOR FOR $key")
+        ImageViewCompat.setImageTintList(
+            this, ColorStateList.valueOf(
+                getWrapperColor(
+                    when (key) {
+                        null -> keypadConfig.contentColor
+                        else -> keypadConfig.getCustomKey(key)!!.contentColor.getValue()
+                    }
+                )
+            )
+        )
+
+//        layoutParams = LayoutParams(0, keypadConfig.getSectionHeight())
+        layoutParams = LayoutParams(0, 0)
+
+        val padding = when(key) {
+            null -> keypadConfig.contentPadding
+            else -> keypadConfig.getCustomKey(key)!!.contentPadding.getValue()
         }
 
-        ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(
-                getWrapperColor(when(key) {
-                    null -> keypadConfig.contentColor
-                    else -> keypadConfig.getCustomKey(key)!!.contentColor.getValue()
-                })
-        ))
-        layoutParams = LayoutParams(0, keypadConfig.getSectionHeight())
+        setPadding(padding, padding, padding, padding)
 
         val enableRipple = when(key) {
             null -> keypadConfig.enableKeyRipple

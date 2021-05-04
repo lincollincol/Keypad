@@ -8,11 +8,11 @@ import androidx.annotation.DrawableRes
 
 class CustomKey private constructor(
         val key: Key,
-        internal var padding: Overridable<Int> = Overridable.getInstance(0),
         internal var textSize: Overridable<Float> = Overridable.getInstance(45f),
         internal var textStyle: Overridable<Int> = Overridable.getInstance(Typeface.NORMAL),
         internal var textFont: Overridable<Typeface> = Overridable.getInstance(Typeface.DEFAULT),
         internal var enableKeyRipple: Overridable<Boolean> = Overridable.getInstance(true),
+        internal var contentPadding: Overridable<Int> = Overridable.getInstance(0),
         internal var contentColor: Overridable<ConfigColorWrapper> = Overridable.getInstance(ConfigColorWrapper(Color.BLACK)),
         internal var hide: Boolean = false
 ) {
@@ -22,11 +22,11 @@ class CustomKey private constructor(
     var type = ContentType.TEXT
         private set
 
-    fun setKeyPadding(padding: Int) = this.padding.setLocal(padding)
     fun setKeyTextSize(sizeSp: Float) = textSize.setLocal(sizeSp)
     fun setKeyTextStyle(typefaceStyle: Int) = textStyle.setLocal(typefaceStyle)
     fun setKeyTextFont(font: Typeface) = textFont.setLocal(font)
     fun enableKeyRipple(enable: Boolean) = enableKeyRipple.setLocal(enable)
+    fun setContentPadding(padding: Int) = contentPadding.setLocal(padding)
 
     fun setKeyContentColorInt(@ColorInt colorInt: Int) =
         contentColor.setLocal(ConfigColorWrapper(colorInt, ConfigColorWrapper.ColorSource.INT))
@@ -37,7 +37,7 @@ class CustomKey private constructor(
     internal fun updateKey(src: CustomKey) {
         value = src.value
         type = src.type
-        padding.copy(src.padding)
+        contentPadding.copy(src.contentPadding)
         textSize.copy(src.textSize)
         textStyle.copy(src.textStyle)
         textFont.copy(src.textFont)
