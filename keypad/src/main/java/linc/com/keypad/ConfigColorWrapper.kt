@@ -1,6 +1,6 @@
 package linc.com.keypad
 
-internal class ConfigColorWrapper(
+internal data class ConfigColorWrapper(
         var color: Int,
         var colorSource: ColorSource = ColorSource.INT,
 ) {

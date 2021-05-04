@@ -2,27 +2,30 @@ package linc.com.keypad
 
 import android.graphics.Color
 import android.graphics.Typeface
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import androidx.annotation.Size
+import linc.com.keypad.Constants.BOTTOM
+import linc.com.keypad.Constants.END
+import linc.com.keypad.Constants.SIDE_COUNT
+import linc.com.keypad.Constants.START
+import linc.com.keypad.Constants.TOP
 
 class KeypadConfig private constructor(
+        // TODO: 04.05.21 validate params
         internal var textSize: Float = 45f,
         internal var textStyle: Int = Typeface.NORMAL,
         internal var textFont: Typeface = Typeface.DEFAULT,
         internal var enableKeyRipple: Boolean = true,
-        internal var contentPadding: Int = 0,
         internal var contentColor: ConfigColorWrapper = ConfigColorWrapper(Color.BLACK),
-        internal var height: SizeWrapper = SizeWrapper(0, SizeWrapper.State.DEFAULT),
-        internal var width: SizeWrapper = SizeWrapper(0, SizeWrapper.State.DEFAULT),
-
-        // TODO: 28.04.21 keyDrawableBackground
+        internal var contentPadding: IntArray = IntArray(SIDE_COUNT) { 0 },
+        internal var contentMargin: IntArray = IntArray(SIDE_COUNT) { 0 },
+        internal var contentBackground: ChangeableWrapper<Int> = ChangeableWrapper(0, ChangeableWrapper.State.DEFAULT),
+        internal var height: ChangeableWrapper<Int> = ChangeableWrapper(0, ChangeableWrapper.State.DEFAULT),
+        internal var width: ChangeableWrapper<Int> = ChangeableWrapper(0, ChangeableWrapper.State.DEFAULT),
 ) {
 
+    // TODO: 04.05.21 hardcoded to const
     private var customKeys = mutableListOf(
             CustomKey.getInstance("*", CustomKey.Key.LEFT),
             CustomKey.getInstance("#", CustomKey.Key.RIGHT)
@@ -59,20 +62,35 @@ class KeypadConfig private constructor(
     fun setKeypadHeightPercent(percent: Int) {
         height.apply {
             value = ScreenManager.getHeightByPercent(percent)
-            state = SizeWrapper.State.CHANGED
+            state = ChangeableWrapper.State.CHANGED
         }
     }
 
     fun setKeypadWidthPercent(percent: Int) {
         width.apply {
             value = ScreenManager.getWidthByPercent(percent)
-            state = SizeWrapper.State.CHANGED
+            state = ChangeableWrapper.State.CHANGED
         }
     }
 
     fun setContentPadding(padding: Int) {
-        contentPadding = padding
-        customKeys.forEach { it.contentPadding.setGlobal(padding) }
+        copyDimenValues(contentPadding, padding, padding, padding, padding)
+        customKeys.forEach { it.contentPadding.setGlobal(contentPadding) }
+    }
+
+    fun setContentPadding(top: Int, bottom: Int, start: Int, end: Int) {
+        copyDimenValues(contentPadding, top, bottom, start, end)
+        customKeys.forEach { it.contentPadding.setGlobal(contentPadding) }
+    }
+
+    fun setContentMargin(margin: Int) {
+        copyDimenValues(contentMargin, margin, margin, margin, margin)
+        customKeys.forEach { it.contentMargin.setGlobal(contentMargin) }
+    }
+
+    fun setContentMargin(top: Int, bottom: Int, start: Int, end: Int) {
+        copyDimenValues(contentMargin, top, bottom, start, end)
+        customKeys.forEach { it.contentMargin.setGlobal(contentMargin) }
     }
 
     fun setKeyContentColorInt(@ColorInt colorInt: Int) {
@@ -85,6 +103,13 @@ class KeypadConfig private constructor(
         val color = ConfigColorWrapper(colorRes, ConfigColorWrapper.ColorSource.RES)
         contentColor = color
         customKeys.forEach { it.contentColor.setGlobal(color) }
+    }
+
+    fun setKeyContentBackground(@DrawableRes drawable: Int) {
+        contentBackground.apply {
+            value = drawable
+            state = ChangeableWrapper.State.CHANGED
+        }
     }
 
     internal fun getCustomKey(key: CustomKey.Key) = customKeys.find { it.key == key }

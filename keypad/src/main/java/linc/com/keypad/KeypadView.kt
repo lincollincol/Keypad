@@ -2,23 +2,20 @@ package linc.com.keypad
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.Canvas
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
-import android.widget.FrameLayout
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
+import androidx.core.view.setMargins
+import androidx.core.view.setPadding
 import androidx.core.widget.ImageViewCompat
-import kotlin.reflect.cast
-import kotlin.reflect.safeCast
 
 
 class KeypadView @JvmOverloads constructor(
@@ -28,6 +25,7 @@ class KeypadView @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
     // TODO: 04.05.21 xml attrs support
+    // TODO: 04.05.21 key size => wrap, 0dp
 
     private var keyClick: OnKeyClickListener? = null
     private var customClick: OnCustomKeyClickListener? = null
@@ -60,9 +58,9 @@ class KeypadView @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         layoutParams.apply {
-            if(keypadConfig.width.state == SizeWrapper.State.CHANGED)
+            if(keypadConfig.width.state == ChangeableWrapper.State.CHANGED)
                 width = keypadConfig.width.value
-            if(keypadConfig.height.state == SizeWrapper.State.CHANGED)
+            if(keypadConfig.height.state == ChangeableWrapper.State.CHANGED)
                 height = keypadConfig.height.value
         }
     }
@@ -186,22 +184,28 @@ class KeypadView @JvmOverloads constructor(
             )
         )
 
-        layoutParams = LayoutParams(0, 0)
-
-        val padding = when(key) {
-            null -> keypadConfig.contentPadding
-            else -> keypadConfig.getCustomKey(key)!!.contentPadding.getValue()
+        layoutParams = LayoutParams(0, 0).apply {
+            setMargins(when(key) {
+                null -> keypadConfig.contentMargin
+                else -> keypadConfig.getCustomKey(key)!!.contentMargin.getValue()
+            })
         }
 
-        setPadding(padding, padding, padding, padding)
+        setPadding(when(key) {
+            null -> keypadConfig.contentPadding
+            else -> keypadConfig.getCustomKey(key)!!.contentPadding.getValue()
+        })
 
         val enableRipple = when(key) {
             null -> keypadConfig.enableKeyRipple
             else -> keypadConfig.getCustomKey(key)!!.enableKeyRipple.getValue()
         }
 
-        if(enableRipple)
-            enableBorderlessRipple()
+        // Set background or ripple
+        when(keypadConfig.contentBackground.state) {
+            ChangeableWrapper.State.CHANGED -> setBackgroundResource(keypadConfig.contentBackground.value)
+            else -> if(enableRipple) enableBorderlessRipple()
+        }
 
     }
 
@@ -222,23 +226,37 @@ class KeypadView @JvmOverloads constructor(
             )
         )
 
-//        layoutParams = LayoutParams(0, keypadConfig.getSectionHeight())
-        layoutParams = LayoutParams(0, 0)
-
-        val padding = when(key) {
-            null -> keypadConfig.contentPadding
-            else -> keypadConfig.getCustomKey(key)!!.contentPadding.getValue()
+        // TODO: 04.05.21 size instead of 0, 0
+        layoutParams = LayoutParams(0, 0).apply {
+            val mar = when(key) {
+                null -> {
+                    println("PARENT")
+                    keypadConfig.contentMargin
+                }
+                else -> {
+                    println("CHILD")
+                    keypadConfig.getCustomKey(key)!!.contentMargin.getValue()
+                }
+            }
+            println(mar.contentToString())
+            setMargins(mar)
         }
 
-        setPadding(padding, padding, padding, padding)
+        setPadding(when(key) {
+            null -> keypadConfig.contentPadding
+            else -> keypadConfig.getCustomKey(key)!!.contentPadding.getValue()
+        })
 
         val enableRipple = when(key) {
             null -> keypadConfig.enableKeyRipple
             else -> keypadConfig.getCustomKey(key)!!.enableKeyRipple.getValue()
         }
 
-        if(enableRipple)
-            enableBorderlessRipple()
+        // Set background or ripple
+        when(keypadConfig.contentBackground.state) {
+            ChangeableWrapper.State.CHANGED -> setBackgroundResource(keypadConfig.contentBackground.value)
+            else -> if(enableRipple) enableBorderlessRipple()
+        }
     }
 
     private fun getWrapperColor(wrapper: ConfigColorWrapper) = when(wrapper.colorSource) {

@@ -14,7 +14,8 @@ class CustomKey private constructor(
         internal var textStyle: Overridable<Int> = Overridable.getInstance(Typeface.NORMAL),
         internal var textFont: Overridable<Typeface> = Overridable.getInstance(Typeface.DEFAULT),
         internal var enableKeyRipple: Overridable<Boolean> = Overridable.getInstance(true),
-        internal var contentPadding: Overridable<Int> = Overridable.getInstance(0),
+        internal var contentPadding: Overridable<IntArray> = Overridable.getInstance(IntArray(Constants.SIDE_COUNT) { 0 }),
+        internal var contentMargin: Overridable<IntArray> = Overridable.getInstance(IntArray(Constants.SIDE_COUNT) { 0 }),
         internal var contentColor: Overridable<ConfigColorWrapper> = Overridable.getInstance(ConfigColorWrapper(Color.BLACK)),
         internal var hide: Boolean = false
 ) {
@@ -23,7 +24,22 @@ class CustomKey private constructor(
     fun setKeyTextStyle(typefaceStyle: Int) = textStyle.setLocal(typefaceStyle)
     fun setKeyTextFont(font: Typeface) = textFont.setLocal(font)
     fun enableKeyRipple(enable: Boolean) = enableKeyRipple.setLocal(enable)
-    fun setContentPadding(padding: Int) = contentPadding.setLocal(padding)
+
+    fun setContentPadding(padding: Int) = contentPadding.modifyLocal {
+        copyDimenValues(it, padding, padding, padding, padding)
+    }
+
+    fun setContentPadding(top: Int, bottom: Int, start: Int, end: Int) = contentPadding.modifyLocal {
+        copyDimenValues(it, top, bottom, start, end)
+    }
+
+    fun setContentMargin(margin: Int) = contentMargin.modifyLocal {
+        copyDimenValues(it, margin, margin, margin, margin)
+    }
+
+    fun setContentMargin(top: Int, bottom: Int, start: Int, end: Int) = contentMargin.modifyLocal {
+        copyDimenValues(it, top, bottom, start, end)
+    }
 
     fun setKeyContentColorInt(@ColorInt colorInt: Int) =
         contentColor.setLocal(ConfigColorWrapper(colorInt, ConfigColorWrapper.ColorSource.INT))
@@ -34,12 +50,13 @@ class CustomKey private constructor(
     internal fun updateKey(src: CustomKey) {
         value = src.value
         type = src.type
-        contentPadding.copy(src.contentPadding)
         textSize.copy(src.textSize)
         textStyle.copy(src.textStyle)
         textFont.copy(src.textFont)
         enableKeyRipple.copy(src.enableKeyRipple)
         contentColor.copy(src.contentColor)
+        contentPadding.copy(src.contentPadding)
+        contentMargin.copy(src.contentMargin)
     }
 
     internal fun getKeyContent() : Content {

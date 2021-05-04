@@ -21,6 +21,11 @@ internal data class Overridable<T>(
         overridden = true
     }
 
+    fun modifyLocal(block: (T) -> Unit) {
+        block.invoke(childValue)
+        overridden = true
+    }
+
     fun copy(src: Overridable<T>) {
         if(src.overridden)
             setLocal(src.childValue)

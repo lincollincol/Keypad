@@ -18,8 +18,10 @@ class MainActivity : AppCompatActivity() {
             applyKeypadConfig(KeypadConfig.getInstance().apply {
                 setKeypadHeightPercent(50)
 //                setKeypadWidthPercent(50)
-//                setKeyTextSize(24f)
+                setContentMargin(20)
+                setKeyTextSize(24f)
                 setKeyTextStyle(Typeface.BOLD)
+                setKeyContentBackground(R.drawable.border)
 //                setKeypadColorRes(android.R.color.holo_purple)
                 setKeyContentColorRes(android.R.color.white)
                 setCustomKey(CustomKey.getInstance("+", CustomKey.Key.LEFT).apply {
