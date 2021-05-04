@@ -28,7 +28,6 @@ class KeypadView @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
     // TODO: 04.05.21 xml attrs support
-    // TODO: 04.05.21 wrap custom key click data
 
     private var keyClick: OnKeyClickListener? = null
     private var customClick: OnCustomKeyClickListener? = null
@@ -131,7 +130,7 @@ class KeypadView @JvmOverloads constructor(
                     CustomKey.ContentType.IMAGE -> getImageKey(customKey.value as Int, key)
                     else -> getTextKey(customKey.value.toString(), key)
                 }.apply {
-                    setOnClickListener { customClick?.onCustomKeyClick(customKey) }
+                    setOnClickListener { customClick?.onCustomKeyClick(customKey.getKeyContent()) }
                     keys[arrayOf(ADDITIONAL_ROW, key.position)] = this
                 })
             } else {
@@ -187,7 +186,6 @@ class KeypadView @JvmOverloads constructor(
             )
         )
 
-//        layoutParams = LayoutParams(0, keypadConfig.getSectionHeight())
         layoutParams = LayoutParams(0, 0)
 
         val padding = when(key) {
@@ -253,7 +251,7 @@ class KeypadView @JvmOverloads constructor(
     }
 
     fun interface OnCustomKeyClickListener {
-        fun onCustomKeyClick(key: CustomKey)
+        fun onCustomKeyClick(key: CustomKey.Content)
     }
 
     companion object {

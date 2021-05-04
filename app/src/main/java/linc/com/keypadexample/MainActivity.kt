@@ -37,27 +37,9 @@ class MainActivity : AppCompatActivity() {
             addKeypadClickListener(KeypadView.OnKeyClickListener {
                 println("KEY = $it")
             })
-
             addKeypadClickListener(KeypadView.OnCustomKeyClickListener {
-
-                println("KEY = ${it.key} ${it.value}, ${it.type}")
+                println("KEY = ${it.key} ${it.value}, ${it.contentType}")
             })
-
-            /*setOnKeypadClickListener(object : Keypad.OnKeypadClickListener() {
-                override fun onKeyClicked(value: Int) {
-                    println(value)
-                }
-
-                override fun onLeftKeyClicked() {
-                    super.onLeftKeyClicked()
-                    println("LEFT")
-                }
-
-                override fun onRightKeyClicked() {
-                    super.onRightKeyClicked()
-                    println("RIGHT")
-                }
-            })*/
         }
     }
 }

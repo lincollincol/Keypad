@@ -7,7 +7,9 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 
 class CustomKey private constructor(
-        val key: Key,
+        internal var value: Any,
+        internal var type: ContentType,
+        internal val key: Key,
         internal var textSize: Overridable<Float> = Overridable.getInstance(45f),
         internal var textStyle: Overridable<Int> = Overridable.getInstance(Typeface.NORMAL),
         internal var textFont: Overridable<Typeface> = Overridable.getInstance(Typeface.DEFAULT),
@@ -16,11 +18,6 @@ class CustomKey private constructor(
         internal var contentColor: Overridable<ConfigColorWrapper> = Overridable.getInstance(ConfigColorWrapper(Color.BLACK)),
         internal var hide: Boolean = false
 ) {
-
-    var value = Any()
-        private set
-    var type = ContentType.TEXT
-        private set
 
     fun setKeyTextSize(sizeSp: Float) = textSize.setLocal(sizeSp)
     fun setKeyTextStyle(typefaceStyle: Int) = textStyle.setLocal(typefaceStyle)
@@ -45,6 +42,16 @@ class CustomKey private constructor(
         contentColor.copy(src.contentColor)
     }
 
+    internal fun getKeyContent() : Content {
+        return Content(value, key, type)
+    }
+
+    data class Content internal constructor(
+            val value: Any,
+            val key: Key,
+            val contentType: ContentType
+    )
+
     enum class Key(internal val position: Int) {
         LEFT(0), RIGHT(2)
     }
@@ -54,14 +61,10 @@ class CustomKey private constructor(
     }
 
     companion object {
-        fun getInstance(value: String, key: Key) = CustomKey(key).apply {
-            this.value = value
-            this.type = ContentType.TEXT
-        }
+        fun getInstance(value: String, key: Key) =
+                CustomKey(value, ContentType.TEXT, key)
 
-        fun getInstance(@DrawableRes value: Int, key: Key) = CustomKey(key).apply {
-            this.value = value
-            this.type = ContentType.IMAGE
-        }
+        fun getInstance(@DrawableRes value: Int, key: Key) =
+                CustomKey(value, ContentType.IMAGE, key)
     }
 }
