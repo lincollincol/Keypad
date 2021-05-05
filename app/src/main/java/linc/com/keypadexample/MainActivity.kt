@@ -4,6 +4,8 @@ import android.graphics.Color
 import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import linc.com.keypad.CustomKey
 import linc.com.keypad.KeypadView
 import linc.com.keypad.KeypadConfig
@@ -18,7 +20,7 @@ class MainActivity : AppCompatActivity() {
             applyKeypadConfig(KeypadConfig.getInstance().apply {
                 setKeypadHeightPercent(50)
 //                setKeypadWidthPercent(50)
-                setContentMargin(20)
+                setKeyMargin(20)
                 setKeyTextSize(24f)
                 setKeyTextStyle(Typeface.BOLD)
                 setKeyContentBackground(R.drawable.border)
@@ -30,10 +32,11 @@ class MainActivity : AppCompatActivity() {
 
                 })
                 setCustomKey(CustomKey.getInstance(R.drawable.ic_coronavirus, CustomKey.Key.RIGHT).apply {
-                    setContentPadding(50)
                     setKeyContentColorInt(Color.CYAN)
+                    setKeyPadding(25)
                 })
-//                hideCustomKey(CustomKey.Key.LEFT, false)
+                setKeyPadding(50, 50, 25, 25)
+                setKeySize(WRAP_CONTENT, WRAP_CONTENT)
             })
 
             addKeypadClickListener(KeypadView.OnKeyClickListener {

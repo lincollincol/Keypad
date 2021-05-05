@@ -5,11 +5,7 @@ import android.graphics.Typeface
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import linc.com.keypad.Constants.BOTTOM
-import linc.com.keypad.Constants.END
 import linc.com.keypad.Constants.SIDE_COUNT
-import linc.com.keypad.Constants.START
-import linc.com.keypad.Constants.TOP
 
 class KeypadConfig private constructor(
         // TODO: 04.05.21 validate params
@@ -17,13 +13,16 @@ class KeypadConfig private constructor(
         internal var textStyle: Int = Typeface.NORMAL,
         internal var textFont: Typeface = Typeface.DEFAULT,
         internal var enableKeyRipple: Boolean = true,
+        internal var keyHeight: Int = 0,
+        internal var keyWidth: Int = 0,
+        internal var keyPadding: IntArray = IntArray(SIDE_COUNT) { 0 },
+        internal var keyMargin: IntArray = IntArray(SIDE_COUNT) { 0 },
         internal var contentColor: ConfigColorWrapper = ConfigColorWrapper(Color.BLACK),
-        internal var contentPadding: IntArray = IntArray(SIDE_COUNT) { 0 },
-        internal var contentMargin: IntArray = IntArray(SIDE_COUNT) { 0 },
         internal var contentBackground: ChangeableWrapper<Int> = ChangeableWrapper(0, ChangeableWrapper.State.DEFAULT),
-        internal var height: ChangeableWrapper<Int> = ChangeableWrapper(0, ChangeableWrapper.State.DEFAULT),
-        internal var width: ChangeableWrapper<Int> = ChangeableWrapper(0, ChangeableWrapper.State.DEFAULT),
-) {
+        internal var keypadHeight: ChangeableWrapper<Int> = ChangeableWrapper(0, ChangeableWrapper.State.DEFAULT),
+        internal var keypadWidth: ChangeableWrapper<Int> = ChangeableWrapper(0, ChangeableWrapper.State.DEFAULT),
+
+        ) {
 
     // TODO: 04.05.21 hardcoded to const
     private var customKeys = mutableListOf(
@@ -60,37 +59,46 @@ class KeypadConfig private constructor(
     }
 
     fun setKeypadHeightPercent(percent: Int) {
-        height.apply {
-            value = ScreenManager.getHeightByPercent(percent)
-            state = ChangeableWrapper.State.CHANGED
-        }
+        keypadHeight.changeDefault(ScreenManager.getHeightByPercent(percent))
     }
 
     fun setKeypadWidthPercent(percent: Int) {
-        width.apply {
-            value = ScreenManager.getWidthByPercent(percent)
-            state = ChangeableWrapper.State.CHANGED
-        }
+        keypadWidth.changeDefault(ScreenManager.getWidthByPercent(percent))
     }
 
-    fun setContentPadding(padding: Int) {
-        copyDimenValues(contentPadding, padding, padding, padding, padding)
-        customKeys.forEach { it.contentPadding.setGlobal(contentPadding) }
+    fun setKeyPadding(padding: Int) {
+        copyDimenValues(keyPadding, padding, padding, padding, padding)
+        customKeys.forEach { it.keyPadding.setGlobal(keyPadding) }
     }
 
-    fun setContentPadding(top: Int, bottom: Int, start: Int, end: Int) {
-        copyDimenValues(contentPadding, top, bottom, start, end)
-        customKeys.forEach { it.contentPadding.setGlobal(contentPadding) }
+    fun setKeyPadding(top: Int, bottom: Int, start: Int, end: Int) {
+        copyDimenValues(keyPadding, top, bottom, start, end)
+        customKeys.forEach { it.keyPadding.setGlobal(keyPadding) }
     }
 
-    fun setContentMargin(margin: Int) {
-        copyDimenValues(contentMargin, margin, margin, margin, margin)
-        customKeys.forEach { it.contentMargin.setGlobal(contentMargin) }
+    fun setKeyMargin(margin: Int) {
+        copyDimenValues(keyMargin, margin, margin, margin, margin)
+        customKeys.forEach { it.keyMargin.setGlobal(keyMargin) }
     }
 
-    fun setContentMargin(top: Int, bottom: Int, start: Int, end: Int) {
-        copyDimenValues(contentMargin, top, bottom, start, end)
-        customKeys.forEach { it.contentMargin.setGlobal(contentMargin) }
+    fun setKeyMargin(top: Int, bottom: Int, start: Int, end: Int) {
+        copyDimenValues(keyMargin, top, bottom, start, end)
+        customKeys.forEach { it.keyMargin.setGlobal(keyMargin) }
+    }
+
+    fun setKeyHeight(dp: Int) {
+        keyHeight = dp
+        customKeys.forEach { it.keyHeight.setGlobal(dp) }
+    }
+
+    fun setKeyWidth(dp: Int) {
+        keyWidth = dp
+        customKeys.forEach { it.keyWidth.setGlobal(dp) }
+    }
+
+    fun setKeySize(widthDp: Int, heightDp: Int) {
+        setKeyHeight(heightDp)
+        setKeyWidth(widthDp)
     }
 
     fun setKeyContentColorInt(@ColorInt colorInt: Int) {
@@ -106,10 +114,7 @@ class KeypadConfig private constructor(
     }
 
     fun setKeyContentBackground(@DrawableRes drawable: Int) {
-        contentBackground.apply {
-            value = drawable
-            state = ChangeableWrapper.State.CHANGED
-        }
+        contentBackground.changeDefault(drawable)
     }
 
     internal fun getCustomKey(key: CustomKey.Key) = customKeys.find { it.key == key }

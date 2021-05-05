@@ -6,16 +6,20 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
-import androidx.core.view.setMargins
-import androidx.core.view.setPadding
 import androidx.core.widget.ImageViewCompat
+import linc.com.keypad.Constants.ADDITIONAL_ROW
+import linc.com.keypad.Constants.COL
+import linc.com.keypad.Constants.EMPTY_KEY
+import linc.com.keypad.Constants.KEYS_PER_SECTION
+import linc.com.keypad.Constants.ROW
+import linc.com.keypad.Constants.ZERO
+import linc.com.keypad.Constants.ZERO_KEY
 
 
 class KeypadView @JvmOverloads constructor(
@@ -25,7 +29,7 @@ class KeypadView @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
     // TODO: 04.05.21 xml attrs support
-    // TODO: 04.05.21 key size => wrap, 0dp
+    // TODO: 05.05.21 marge text and image view params
 
     private var keyClick: OnKeyClickListener? = null
     private var customClick: OnCustomKeyClickListener? = null
@@ -58,10 +62,10 @@ class KeypadView @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         layoutParams.apply {
-            if(keypadConfig.width.state == ChangeableWrapper.State.CHANGED)
-                width = keypadConfig.width.value
-            if(keypadConfig.height.state == ChangeableWrapper.State.CHANGED)
-                height = keypadConfig.height.value
+            if(keypadConfig.keypadWidth.state == ChangeableWrapper.State.CHANGED)
+                width = keypadConfig.keypadWidth.value
+            if(keypadConfig.keypadHeight.state == ChangeableWrapper.State.CHANGED)
+                height = keypadConfig.keypadHeight.value
         }
     }
 
@@ -184,16 +188,23 @@ class KeypadView @JvmOverloads constructor(
             )
         )
 
-        layoutParams = LayoutParams(0, 0).apply {
+        val size = when(key) {
+            null -> keypadConfig.keyWidth.toDp(resources) to
+                    keypadConfig.keyHeight.toDp(resources)
+            else -> keypadConfig.getCustomKey(key)!!.keyWidth.getValue() to
+                    keypadConfig.getCustomKey(key)!!.keyHeight.getValue()
+        }
+
+        layoutParams = LayoutParams(size.first, size.second).apply {
             setMargins(when(key) {
-                null -> keypadConfig.contentMargin
-                else -> keypadConfig.getCustomKey(key)!!.contentMargin.getValue()
+                null -> keypadConfig.keyMargin
+                else -> keypadConfig.getCustomKey(key)!!.keyMargin.getValue()
             })
         }
 
         setPadding(when(key) {
-            null -> keypadConfig.contentPadding
-            else -> keypadConfig.getCustomKey(key)!!.contentPadding.getValue()
+            null -> keypadConfig.keyPadding
+            else -> keypadConfig.getCustomKey(key)!!.keyPadding.getValue()
         })
 
         val enableRipple = when(key) {
@@ -226,25 +237,23 @@ class KeypadView @JvmOverloads constructor(
             )
         )
 
-        // TODO: 04.05.21 size instead of 0, 0
-        layoutParams = LayoutParams(0, 0).apply {
-            val mar = when(key) {
-                null -> {
-                    println("PARENT")
-                    keypadConfig.contentMargin
-                }
-                else -> {
-                    println("CHILD")
-                    keypadConfig.getCustomKey(key)!!.contentMargin.getValue()
-                }
-            }
-            println(mar.contentToString())
-            setMargins(mar)
+        val size = when(key) {
+            null -> keypadConfig.keyWidth.toDp(resources) to
+                    keypadConfig.keyHeight.toDp(resources)
+            else -> keypadConfig.getCustomKey(key)!!.keyWidth.getValue() to
+                    keypadConfig.getCustomKey(key)!!.keyHeight.getValue()
+        }
+
+        layoutParams = LayoutParams(size.first, size.second).apply {
+            setMargins(when(key) {
+                null -> keypadConfig.keyMargin
+                else -> keypadConfig.getCustomKey(key)!!.keyMargin.getValue()
+            })
         }
 
         setPadding(when(key) {
-            null -> keypadConfig.contentPadding
-            else -> keypadConfig.getCustomKey(key)!!.contentPadding.getValue()
+            null -> keypadConfig.keyPadding
+            else -> keypadConfig.getCustomKey(key)!!.keyPadding.getValue()
         })
 
         val enableRipple = when(key) {
@@ -270,17 +279,5 @@ class KeypadView @JvmOverloads constructor(
 
     fun interface OnCustomKeyClickListener {
         fun onCustomKeyClick(key: CustomKey.Content)
-    }
-
-    companion object {
-        private const val ZERO_KEY = "0"
-        private const val EMPTY_KEY = ""
-        private const val KEYS_PER_SECTION = 3
-
-        private const val ROW = 0
-        private const val COL = 1
-
-        private const val ADDITIONAL_ROW = 3
-        private const val ZERO = 1
     }
 }

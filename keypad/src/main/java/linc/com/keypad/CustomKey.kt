@@ -14,8 +14,10 @@ class CustomKey private constructor(
         internal var textStyle: Overridable<Int> = Overridable.getInstance(Typeface.NORMAL),
         internal var textFont: Overridable<Typeface> = Overridable.getInstance(Typeface.DEFAULT),
         internal var enableKeyRipple: Overridable<Boolean> = Overridable.getInstance(true),
-        internal var contentPadding: Overridable<IntArray> = Overridable.getInstance(IntArray(Constants.SIDE_COUNT) { 0 }),
-        internal var contentMargin: Overridable<IntArray> = Overridable.getInstance(IntArray(Constants.SIDE_COUNT) { 0 }),
+        internal var keyHeight: Overridable<Int> = Overridable.getInstance(0),
+        internal var keyWidth: Overridable<Int> = Overridable.getInstance(0),
+        internal var keyPadding: Overridable<IntArray> = Overridable.getInstance(IntArray(Constants.SIDE_COUNT) { 0 }),
+        internal var keyMargin: Overridable<IntArray> = Overridable.getInstance(IntArray(Constants.SIDE_COUNT) { 0 }),
         internal var contentColor: Overridable<ConfigColorWrapper> = Overridable.getInstance(ConfigColorWrapper(Color.BLACK)),
         internal var hide: Boolean = false
 ) {
@@ -25,20 +27,32 @@ class CustomKey private constructor(
     fun setKeyTextFont(font: Typeface) = textFont.setLocal(font)
     fun enableKeyRipple(enable: Boolean) = enableKeyRipple.setLocal(enable)
 
-    fun setContentPadding(padding: Int) = contentPadding.modifyLocal {
+    fun setKeyPadding(padding: Int) = keyPadding.modifyLocal {
         copyDimenValues(it, padding, padding, padding, padding)
     }
 
-    fun setContentPadding(top: Int, bottom: Int, start: Int, end: Int) = contentPadding.modifyLocal {
+    fun setKeyPadding(top: Int, bottom: Int, start: Int, end: Int) = keyPadding.modifyLocal {
         copyDimenValues(it, top, bottom, start, end)
     }
 
-    fun setContentMargin(margin: Int) = contentMargin.modifyLocal {
+    fun setKeyMargin(margin: Int) = keyMargin.modifyLocal {
         copyDimenValues(it, margin, margin, margin, margin)
     }
 
-    fun setContentMargin(top: Int, bottom: Int, start: Int, end: Int) = contentMargin.modifyLocal {
+    fun setKeyMargin(top: Int, bottom: Int, start: Int, end: Int) = keyMargin.modifyLocal {
         copyDimenValues(it, top, bottom, start, end)
+    }
+
+    @Deprecated("Incorrect layout", ReplaceWith("KeypadConfig.setKeyHeight()"), DeprecationLevel.HIDDEN)
+    fun setKeyHeight(dp: Int) = keyHeight.setLocal(dp)
+
+    @Deprecated("Incorrect layout", ReplaceWith("KeypadConfig.setKeyWidth()"), DeprecationLevel.HIDDEN)
+    fun setKeyWidth(dp: Int) = keyWidth.setLocal(dp)
+
+    @Deprecated("Incorrect layout", ReplaceWith("KeypadConfig.setKeySize()"), DeprecationLevel.HIDDEN)
+    fun setKeySize(widthDp: Int, heightDp: Int) {
+//        setKeyHeight(heightDp)
+//        setKeyWidth(widthDp)
     }
 
     fun setKeyContentColorInt(@ColorInt colorInt: Int) =
@@ -55,8 +69,10 @@ class CustomKey private constructor(
         textFont.copy(src.textFont)
         enableKeyRipple.copy(src.enableKeyRipple)
         contentColor.copy(src.contentColor)
-        contentPadding.copy(src.contentPadding)
-        contentMargin.copy(src.contentMargin)
+        keyPadding.copy(src.keyPadding)
+        keyMargin.copy(src.keyMargin)
+//        keyHeight.copy(src.keyHeight)
+//        keyWidth.copy(src.keyWidth)
     }
 
     internal fun getKeyContent() : Content {
