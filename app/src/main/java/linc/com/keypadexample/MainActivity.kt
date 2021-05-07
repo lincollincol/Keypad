@@ -16,8 +16,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         findViewById<KeypadView>(R.id.keypad).apply {
-
-            applyKeypadConfig(KeypadConfig.getInstance().apply {
+            applyKeypadConfig {
                 setKeypadHeightPercent(50)
 //                setKeypadWidthPercent(50)
                 setKeyMargin(20)
@@ -37,7 +36,7 @@ class MainActivity : AppCompatActivity() {
                 })
                 setKeyPadding(50, 50, 25, 25)
                 setKeySize(WRAP_CONTENT, WRAP_CONTENT)
-            })
+            }
 
             addKeypadClickListener(KeypadView.OnKeyClickListener {
                 println("KEY = $it")

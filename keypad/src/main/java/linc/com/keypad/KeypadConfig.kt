@@ -5,14 +5,15 @@ import android.graphics.Typeface
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
+import linc.com.keypad.Constants.DEFAULT_LEFT_KEY
+import linc.com.keypad.Constants.DEFAULT_RIGHT_KEY
 import linc.com.keypad.Constants.SIDE_COUNT
 
-class KeypadConfig private constructor(
-        // TODO: 04.05.21 validate params
-        internal var textSize: Float = 45f,
-        internal var textStyle: Int = Typeface.NORMAL,
-        internal var textFont: Typeface = Typeface.DEFAULT,
-        internal var enableKeyRipple: Boolean = true,
+class KeypadConfig internal constructor(
+        internal var keyTextSize: Float = 45f,
+        internal var keyTextStyle: Int = Typeface.NORMAL,
+        internal var keyTextFont: Typeface = Typeface.DEFAULT,
+        internal var keyEnableRipple: Boolean = true,
         internal var keyHeight: Int = 0,
         internal var keyWidth: Int = 0,
         internal var keyPadding: IntArray = IntArray(SIDE_COUNT) { 0 },
@@ -21,13 +22,11 @@ class KeypadConfig private constructor(
         internal var contentBackground: ChangeableWrapper<Int> = ChangeableWrapper(0, ChangeableWrapper.State.DEFAULT),
         internal var keypadHeight: ChangeableWrapper<Int> = ChangeableWrapper(0, ChangeableWrapper.State.DEFAULT),
         internal var keypadWidth: ChangeableWrapper<Int> = ChangeableWrapper(0, ChangeableWrapper.State.DEFAULT),
+) {
 
-        ) {
-
-    // TODO: 04.05.21 hardcoded to const
     private var customKeys = mutableListOf(
-            CustomKey.getInstance("*", CustomKey.Key.LEFT),
-            CustomKey.getInstance("#", CustomKey.Key.RIGHT)
+            CustomKey.getInstance(DEFAULT_LEFT_KEY, CustomKey.Key.LEFT),
+            CustomKey.getInstance(DEFAULT_RIGHT_KEY, CustomKey.Key.RIGHT)
     )
 
     fun hideCustomKey(key: CustomKey.Key, hide: Boolean) {
@@ -39,26 +38,27 @@ class KeypadConfig private constructor(
     }
 
     fun setKeyTextSize(sizeSp: Float) {
-        textSize = sizeSp
-        customKeys.forEach { it.textSize.setGlobal(sizeSp) }
+        keyTextSize = sizeSp
+        customKeys.forEach { it.keyTextSize.setGlobal(sizeSp) }
     }
 
     fun setKeyTextStyle(typefaceStyle: Int) {
-        textStyle = typefaceStyle
-        customKeys.forEach { it.textStyle.setGlobal(typefaceStyle) }
+        keyTextStyle = typefaceStyle
+        customKeys.forEach { it.keyTextStyle.setGlobal(typefaceStyle) }
     }
 
     fun setKeyTextFont(font: Typeface) {
-        textFont = font
-        customKeys.forEach { it.textFont.setGlobal(font) }
+        keyTextFont = font
+        customKeys.forEach { it.keyTextFont.setGlobal(font) }
     }
 
     fun enableKeyRipple(enable: Boolean) {
-        enableKeyRipple = enable
-        customKeys.forEach { it.enableKeyRipple.setGlobal(enable) }
+        keyEnableRipple = enable
+        customKeys.forEach { it.keyEnableRipple.setGlobal(enable) }
     }
 
     fun setKeypadHeightPercent(percent: Int) {
+        println("setKeypadHeightPercent")
         keypadHeight.changeDefault(ScreenManager.getHeightByPercent(percent))
     }
 
@@ -120,6 +120,6 @@ class KeypadConfig private constructor(
     internal fun getCustomKey(key: CustomKey.Key) = customKeys.find { it.key == key }
 
     companion object {
-        fun getInstance() = KeypadConfig()
+        internal fun getInstance() = KeypadConfig()
     }
 }

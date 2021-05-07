@@ -10,10 +10,10 @@ class CustomKey private constructor(
         internal var value: Any,
         internal var type: ContentType,
         internal val key: Key,
-        internal var textSize: Overridable<Float> = Overridable.getInstance(45f),
-        internal var textStyle: Overridable<Int> = Overridable.getInstance(Typeface.NORMAL),
-        internal var textFont: Overridable<Typeface> = Overridable.getInstance(Typeface.DEFAULT),
-        internal var enableKeyRipple: Overridable<Boolean> = Overridable.getInstance(true),
+        internal var keyTextSize: Overridable<Float> = Overridable.getInstance(45f),
+        internal var keyTextStyle: Overridable<Int> = Overridable.getInstance(Typeface.NORMAL),
+        internal var keyTextFont: Overridable<Typeface> = Overridable.getInstance(Typeface.DEFAULT),
+        internal var keyEnableRipple: Overridable<Boolean> = Overridable.getInstance(true),
         internal var keyHeight: Overridable<Int> = Overridable.getInstance(0),
         internal var keyWidth: Overridable<Int> = Overridable.getInstance(0),
         internal var keyPadding: Overridable<IntArray> = Overridable.getInstance(IntArray(Constants.SIDE_COUNT) { 0 }),
@@ -22,10 +22,10 @@ class CustomKey private constructor(
         internal var hide: Boolean = false
 ) {
 
-    fun setKeyTextSize(sizeSp: Float) = textSize.setLocal(sizeSp)
-    fun setKeyTextStyle(typefaceStyle: Int) = textStyle.setLocal(typefaceStyle)
-    fun setKeyTextFont(font: Typeface) = textFont.setLocal(font)
-    fun enableKeyRipple(enable: Boolean) = enableKeyRipple.setLocal(enable)
+    fun setKeyTextSize(sizeSp: Float) = keyTextSize.setLocal(sizeSp)
+    fun setKeyTextStyle(typefaceStyle: Int) = keyTextStyle.setLocal(typefaceStyle)
+    fun setKeyTextFont(font: Typeface) = keyTextFont.setLocal(font)
+    fun enableKeyRipple(enable: Boolean) = keyEnableRipple.setLocal(enable)
 
     fun setKeyPadding(padding: Int) = keyPadding.modifyLocal {
         copyDimenValues(it, padding, padding, padding, padding)
@@ -64,10 +64,10 @@ class CustomKey private constructor(
     internal fun updateKey(src: CustomKey) {
         value = src.value
         type = src.type
-        textSize.copy(src.textSize)
-        textStyle.copy(src.textStyle)
-        textFont.copy(src.textFont)
-        enableKeyRipple.copy(src.enableKeyRipple)
+        keyTextSize.copy(src.keyTextSize)
+        keyTextStyle.copy(src.keyTextStyle)
+        keyTextFont.copy(src.keyTextFont)
+        keyEnableRipple.copy(src.keyEnableRipple)
         contentColor.copy(src.contentColor)
         keyPadding.copy(src.keyPadding)
         keyMargin.copy(src.keyMargin)

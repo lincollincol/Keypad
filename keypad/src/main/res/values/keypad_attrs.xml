@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="KeypadView">
+        <attr name="keyTextSize" format="float"/>
+        <attr name="keyTextStyle" format="integer"/>
+        <attr name="keyEnableRipple" format="boolean"/>
+        <attr name="keyHeight" format="integer"/>
+        <attr name="keyWidth" format="integer"/>
+        <attr name="keyPadding" format="integer"/>
+        <attr name="keyPaddingTop" format="integer"/>
+        <attr name="keyPaddingBottom" format="integer"/>
+        <attr name="keyPaddingStart" format="integer"/>
+        <attr name="keyPaddingEnd" format="integer"/>
+        <attr name="keyMargin" format="integer"/>
+        <attr name="keyMarginTop" format="integer"/>
+        <attr name="keyMarginBottom" format="integer"/>
+        <attr name="keyMarginStart" format="integer"/>
+        <attr name="keyMarginEnd" format="integer"/>
+        <attr name="contentColor" format="color"/>
+        <attr name="contentBackground" format="color"/>
+        <attr name="keypadHeight" format="integer"/>
+        <attr name="keypadWidth" format="integer"/>
+
+        <!--CustomKey-->
+
+    </declare-styleable>
+</resources>
